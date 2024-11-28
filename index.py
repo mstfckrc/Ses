@@ -7,13 +7,12 @@ import scipy.io.wavfile as wavfile
 import matplotlib.pyplot as plt
 from collections import deque
 from sklearn.svm import SVC
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 import speech_recognition as sr
 import os
 import threading
-from sklearn.preprocessing import StandardScaler
 
 # Ses ayarları
 SAMPLE_RATE = 22050  # Örnekleme frekansı
@@ -24,10 +23,11 @@ DATA_DIR = "data"  # Ses kayıtlarının saklanacağı klasör
 # Global değişkenler
 speaker_model = None
 label_encoder = None
+scaler = StandardScaler()  # Eğitimde kullanılan scaler, test sırasında da kullanılacak
 audio_data = deque(maxlen=SAMPLE_RATE * 10)  # Histogram için 10 saniyelik veri
 stop_flag = False  # Histogram döngüsü kontrolü
 ground_truth = None  # Gerçek konuşmacı kimliği
-word_count = 0  # Toplam söylenen kelime sayısı
+word_count = 0  # Toplam kelime sayısı global olarak tanımlandı
 
 
 # ---------------- Ses Kaydı ----------------
@@ -73,7 +73,7 @@ def load_speakers_data(data_dir="data"):
 
 def train_speaker_model():
     """Konuşmacı tanıma modeli eğitir."""
-    global speaker_model, label_encoder
+    global speaker_model, label_encoder, scaler
 
     speakers_data = load_speakers_data(DATA_DIR)
     if not speakers_data:
@@ -87,7 +87,8 @@ def train_speaker_model():
         for file in files:
             audio, sr = librosa.load(file, sr=SAMPLE_RATE)
             mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=20)
-            X.append(np.mean(mfccs.T, axis=0))
+            mfccs_mean = np.mean(mfccs.T, axis=0)
+            X.append(mfccs_mean)
             y.append(speaker)
 
     X = np.array(X)
@@ -96,16 +97,20 @@ def train_speaker_model():
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y)
 
+    # Veriyi normalize et (Scaler eğitimde fit edilir)
+    X = scaler.fit_transform(X)
+
     X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
+    # Model eğitimi
     speaker_model = SVC(kernel="linear", probability=True)
     speaker_model.fit(X_train, y_train)
 
-    # Model doğruluğunu hesapla ve konsola yazdır
+    # Model doğruluğunu hesapla
     y_pred = speaker_model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred, average="weighted")  # F1-Score hesaplanır
-    print(f"Model doğruluğu: {accuracy * 100:.2f}%")
+    f1 = f1_score(y_test, y_pred, average="weighted")
+    print(f"Model doğruluğu: {accuracy:.2f}")
     print(f"F1-Score: {f1:.2f}")
     return True
 
@@ -165,11 +170,13 @@ def user_story_1():
 # ---------------- User Story 2: Ses Tanıma ----------------
 def user_story_2():
     """Ses tanıma işlemi başlatır ve anlık olarak ekranda gösterir."""
+    global word_count
+    word_count = 0  # Kelime sayısını her yeni pencere açıldığında sıfırlıyoruz
+
     def recognize_continuous():
         """Mikrofondan sürekli olarak ses tanıyıp anlık olarak ekranda gösterir."""
-        global word_count
-
         recognizer = sr.Recognizer()
+        global word_count
 
         # Yeni pencere açılır
         result_window = tk.Toplevel(root)
@@ -182,6 +189,9 @@ def user_story_2():
         text_display = tk.Text(result_window, height=10, width=40, font=("Arial", 14))
         text_display.pack(pady=20)
 
+        # Text widget'ını sadece okunabilir yapmak
+        text_display.config(state=tk.DISABLED)
+
         acc_label = tk.Label(result_window, text="Accuracy: --", font=("Arial", 12))
         acc_label.pack(pady=10)
 
@@ -193,14 +203,17 @@ def user_story_2():
 
         # Mikrofon üzerinden ses tanıma
         with sr.Microphone() as source:
+            word_count = 0
             print("Ses tanıma başlatıldı...")
             recognizer.adjust_for_ambient_noise(source)
             while True:
                 try:
                     audio = recognizer.listen(source)
                     text = recognizer.recognize_google(audio, language="tr-TR")
+                    text_display.config(state=tk.NORMAL)  # Text widget'ını yazmaya izin ver
                     text_display.insert(tk.END, text + '\n')  # Anlık metni ekler
                     text_display.yview(tk.END)  # Ekranın en altına kaydırır
+                    text_display.config(state=tk.DISABLED)  # Text widget'ını sadece okunabilir yap
 
                     # Kelime sayısını artır
                     word_count += len(text.split())
@@ -210,16 +223,21 @@ def user_story_2():
 
                     # F1-Score ve Accuracy hesaplamak
                     if speaker_model is not None:
-                        mfccs = librosa.feature.mfcc(y=np.array(audio.get_wav_data()), sr=SAMPLE_RATE, n_mfcc=20)
+                        # Ses verisini alıyoruz ve MFCC çıkarıyoruz
+                        audio_data = np.array(audio.get_wav_data())
+                        mfccs = librosa.feature.mfcc(y=audio_data, sr=SAMPLE_RATE, n_mfcc=20)
                         mfccs_mean = np.mean(mfccs.T, axis=0).reshape(1, -1)
+
+                        # Modeli kullanarak tahmin yapıyoruz
                         prediction = speaker_model.predict(mfccs_mean)
                         speaker_name = label_encoder.inverse_transform(prediction)[0]
                         print(f"Tanımlanan Konuşmacı: {speaker_name}")
 
-                        # Model doğruluğu ve F1-Score
+                        # Model doğruluğu ve F1-Score hesaplanıyor
                         accuracy = accuracy_score([ground_truth], [speaker_name])  # Ground truth ile karşılaştırıyoruz
                         f1 = f1_score([ground_truth], [speaker_name], average='weighted')  # F1-Score
 
+                        # Sonuçları ekrana yazdır
                         acc_label.config(text=f"Accuracy: {accuracy:.2f}")
                         f1_label.config(text=f"F1-Score: {f1:.2f}")
                 except sr.UnknownValueError:
@@ -235,7 +253,7 @@ def user_story_2():
 # ---------------- User Story 3: Anlık Kişi Tanıma ----------------
 def user_story_3():
     """Her tıklamada model eğitilir ve anlık kişi tanıma yapılır."""
-    global speaker_model, label_encoder
+    global speaker_model, label_encoder, scaler
 
     # Model eğitimi
     if not train_speaker_model():
@@ -243,12 +261,12 @@ def user_story_3():
         return
 
     def recognize(indata, frames, time, status):
-        """Konuşmacı tanımayı işler ve ses eşiği kontrolü yapar."""
+        """Konuşmacı tanımayı işler ve ses eşiği kontrolü yapar.""" 
         audio = np.array(indata[:, 0])  # Alınan ses verisi
         audio_magnitude = np.linalg.norm(audio)  # Sesin genliğini ölçüyoruz (L2 normu)
         
         # Ses genliği bir eşikten büyükse, konuşmacıyı tanıyacağız
-        threshold = 1  # Eşik değeri, bu değeri ihtiyacınıza göre ayarlayabilirsiniz
+        threshold = 2  # Eşik değeri
         if audio_magnitude > threshold:
             print(f"Ses Eşiği Aşıldı: {audio_magnitude}")
             
@@ -257,11 +275,8 @@ def user_story_3():
             mfccs_mean = np.mean(mfccs.T, axis=0).reshape(1, -1)
             
             # MFCC özelliklerini normalleştiriyoruz (eğitimdeki gibi)
-            mfccs_scaled = StandardScaler().fit_transform(mfccs.T)
-            mfccs_scaled_mean = np.mean(mfccs_scaled, axis=0).reshape(1, -1)
-            
-            # Konuşmacıyı tahmin et
-            prediction = speaker_model.predict(mfccs_scaled_mean)
+            mfccs_scaled = scaler.transform(mfccs_mean)
+            prediction = speaker_model.predict(mfccs_scaled)
             speaker_name = label_encoder.inverse_transform(prediction)[0]
             print(f"Tanımlanan Konuşmacı: {speaker_name}")
 
@@ -273,7 +288,6 @@ def user_story_3():
     # Anlık kişi tanıma işlemi
     with sd.InputStream(callback=recognize, channels=1, samplerate=SAMPLE_RATE, blocksize=CHUNK):
         messagebox.showinfo("Bilgi", "Anlık konuşmacı tanıma başlatıldı. Pencereyi kapatmak için 'X'e basabilirsiniz.")
-
 
 
 # ---------------- Ana Menü ----------------
