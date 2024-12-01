@@ -127,6 +127,7 @@ def update_histogram():
     plt.ion()
     plt.show()  # Grafiği ilk kez başlatıyoruz
     while not stop_flag:
+        # Zaman domaini grafiği (ses dalga formu)
         plt.subplot(2, 1, 1)
         plt.cla()
         plt.plot(audio_data)
@@ -135,17 +136,15 @@ def update_histogram():
         plt.ylabel("Genlik")
         plt.xlim(0, len(audio_data))
 
-        N = len(audio_data)
-        if N > 0:
-            freqs = np.fft.fftfreq(N, 1 / SAMPLE_RATE)
-            fft_data = np.fft.fft(np.array(audio_data))
-            fft_data = np.abs(fft_data[:N // 2])
-            plt.subplot(2, 1, 2)
-            plt.cla()
-            plt.plot(freqs[:N // 2], fft_data)
-            plt.title("Frekans Domaini - FFT")
-            plt.xlabel("Frekans (Hz)")
-            plt.ylabel("Genlik")
+        # Spektrogram grafiği (Frekans domaini)
+        plt.subplot(2, 1, 2)
+        plt.cla()
+        # Spektrogram çizimi
+        plt.specgram(np.array(audio_data), Fs=SAMPLE_RATE, NFFT=1024, noverlap=512, scale='dB', cmap='viridis')
+        plt.title("Spektrogram - Frekans Domaini")
+        plt.xlabel("Zaman (saniye)")
+        plt.ylabel("Frekans (Hz)")
+
         plt.tight_layout()
         plt.pause(0.1)
 
@@ -169,9 +168,11 @@ def user_story_1():
 
 # ---------------- User Story 2: Ses Tanıma ----------------
 def user_story_2():
-    """Ses tanıma işlemi başlatır ve anlık olarak ekranda gösterir."""
+    """Ses tanıma işlemi başlatır ve tanınan metni ekrana yazdırır."""
     global word_count
     word_count = 0  # Kelime sayısını her yeni pencere açıldığında sıfırlıyoruz
+
+    predefined_words = {"merhaba", "evet", "hayır", "tamam", "lütfen", "teşekkürler"}  # Örnek doğru kelimeler
 
     def recognize_continuous():
         """Mikrofondan sürekli olarak ses tanıyıp anlık olarak ekranda gösterir."""
@@ -209,37 +210,33 @@ def user_story_2():
             while True:
                 try:
                     audio = recognizer.listen(source)
-                    text = recognizer.recognize_google(audio, language="tr-TR")
-                    text_display.config(state=tk.NORMAL)  # Text widget'ını yazmaya izin ver
-                    text_display.insert(tk.END, text + '\n')  # Anlık metni ekler
-                    text_display.yview(tk.END)  # Ekranın en altına kaydırır
-                    text_display.config(state=tk.DISABLED)  # Text widget'ını sadece okunabilir yap
+                    recognized_text = recognizer.recognize_google(audio, language="tr-TR")
+
+                    # Tanınan kelimeleri ekrana yaz
+                    text_display.config(state=tk.NORMAL)  # Yazma izni
+                    text_display.insert(tk.END, recognized_text + '\n')  # Tanınan metni ekler
+                    text_display.yview(tk.END)  # Ekranın en altına kaydır
+                    text_display.config(state=tk.DISABLED)  # Sadece okunabilir yap
+
+                    # Tanınan kelimeler
+                    recognized_words = set(recognized_text.lower().split())
+                    true_positives = recognized_words & predefined_words  # Doğru kelimelerle kesişim
 
                     # Kelime sayısını artır
-                    word_count += len(text.split())
+                    word_count += len(recognized_words)
 
-                    # Toplam kelime sayısını güncelle
+                    # Precision ve Recall hesaplama
+                    precision = len(true_positives) / len(recognized_words) if recognized_words else 0
+                    recall = len(true_positives) / len(predefined_words) if predefined_words else 0
+
+                    # F1-Score ve Accuracy
+                    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+                    accuracy = len(true_positives) / len(predefined_words) if predefined_words else 0
+
+                    # Sonuçları güncelle
+                    acc_label.config(text=f"Accuracy: {accuracy:.2f}")
+                    f1_label.config(text=f"F1-Score: {f1:.2f}")
                     word_count_label.config(text=f"Toplam Kelime Sayısı: {word_count}")
-
-                    # F1-Score ve Accuracy hesaplamak
-                    if speaker_model is not None:
-                        # Ses verisini alıyoruz ve MFCC çıkarıyoruz
-                        audio_data = np.array(audio.get_wav_data())
-                        mfccs = librosa.feature.mfcc(y=audio_data, sr=SAMPLE_RATE, n_mfcc=20)
-                        mfccs_mean = np.mean(mfccs.T, axis=0).reshape(1, -1)
-
-                        # Modeli kullanarak tahmin yapıyoruz
-                        prediction = speaker_model.predict(mfccs_mean)
-                        speaker_name = label_encoder.inverse_transform(prediction)[0]
-                        print(f"Tanımlanan Konuşmacı: {speaker_name}")
-
-                        # Model doğruluğu ve F1-Score hesaplanıyor
-                        accuracy = accuracy_score([ground_truth], [speaker_name])  # Ground truth ile karşılaştırıyoruz
-                        f1 = f1_score([ground_truth], [speaker_name], average='weighted')  # F1-Score
-
-                        # Sonuçları ekrana yazdır
-                        acc_label.config(text=f"Accuracy: {accuracy:.2f}")
-                        f1_label.config(text=f"F1-Score: {f1:.2f}")
                 except sr.UnknownValueError:
                     pass  # Anlaşılmayan sesleri yoksay
                 except sr.RequestError:
@@ -250,7 +247,37 @@ def user_story_2():
     threading.Thread(target=recognize_continuous, daemon=True).start()
 
 
+
+
 # ---------------- User Story 3: Anlık Kişi Tanıma ----------------
+def predict_emotion(audio):
+    """Ses sinyalinden duygu tahmini yapar."""
+    # MFCC özelliklerini çıkarma
+    mfccs = librosa.feature.mfcc(y=audio, sr=SAMPLE_RATE, n_mfcc=20)
+    energy = np.sum(audio ** 2) / len(audio)  # Enerji hesaplama
+    pitch = np.mean(np.abs(librosa.feature.zero_crossing_rate(y=audio)))  # Pitch (ton) hesaplama
+    zero_crossings = np.sum(librosa.feature.zero_crossing_rate(y=audio))  # Sıfır geçişi sayısı
+
+    # Duygu sınıflandırması
+    if energy > 0.02 and pitch > 0.1 and zero_crossings < 300:
+        emotion = "Mutlu"
+        confidence = 90
+    elif energy < 0.01 and pitch < 0.05:
+        emotion = "Üzgün"
+        confidence = 85
+    elif energy > 0.02 and pitch > 0.2:
+        emotion = "Sinirli"
+        confidence = 80
+    elif energy < 0.01 and pitch > 0.1:
+        emotion = "Korkmuş"
+        confidence = 75
+    else:
+        emotion = "Nötr"
+        confidence = 50
+
+    return emotion, confidence
+
+
 def user_story_3():
     """Her tıklamada model eğitilir ve anlık kişi tanıma yapılır."""
     global speaker_model, label_encoder, scaler
@@ -261,12 +288,12 @@ def user_story_3():
         return
 
     def recognize(indata, frames, time, status):
-        """Konuşmacı tanımayı işler ve ses eşiği kontrolü yapar.""" 
+        """Konuşmacı tanımayı işler ve ses eşiği kontrolü yapar."""
         audio = np.array(indata[:, 0])  # Alınan ses verisi
         audio_magnitude = np.linalg.norm(audio)  # Sesin genliğini ölçüyoruz (L2 normu)
         
         # Ses genliği bir eşikten büyükse, konuşmacıyı tanıyacağız
-        threshold = 2  # Eşik değeri
+        threshold = 1.5  # Eşik değeri
         if audio_magnitude > threshold:
             print(f"Ses Eşiği Aşıldı: {audio_magnitude}")
             
@@ -276,18 +303,58 @@ def user_story_3():
             
             # MFCC özelliklerini normalleştiriyoruz (eğitimdeki gibi)
             mfccs_scaled = scaler.transform(mfccs_mean)
+            
+            # Model tahmini
             prediction = speaker_model.predict(mfccs_scaled)
+            prediction_proba = speaker_model.predict_proba(mfccs_scaled)  # Tahmin olasılıkları
             speaker_name = label_encoder.inverse_transform(prediction)[0]
-            print(f"Tanımlanan Konuşmacı: {speaker_name}")
+            
+            # Duygu tahmini
+            emotion, emotion_confidence = predict_emotion(audio)
+
+            # Doğruluk oranını hesaplama
+            confidence = np.max(prediction_proba) * 100  # En yüksek olasılığı alıp yüzdelik çeviriyoruz
+            print(f"Tanımlanan Konuşmacı: {speaker_name}, Doğruluk Oranı: {confidence:.2f}%")
+            print(f"Duygu: {emotion}, Duygu Doğruluğu: {emotion_confidence:.2f}%")
+
+            # Duygu yüzdesi hesaplama
+            emotions = ["Mutlu", "Üzgün", "Sinirli", "Korkmuş", "Nötr"]
+            emotion_percentages = {
+                "Mutlu": 0,
+                "Üzgün": 0,
+                "Sinirli": 0,
+                "Korkmuş": 0,
+                "Nötr": 0
+            }
+            
+            # Yüzdelik hesaplama
+            if emotion == "Mutlu":
+                emotion_percentages["Mutlu"] = emotion_confidence
+            elif emotion == "Üzgün":
+                emotion_percentages["Üzgün"] = emotion_confidence
+            elif emotion == "Sinirli":
+                emotion_percentages["Sinirli"] = emotion_confidence
+            elif emotion == "Korkmuş":
+                emotion_percentages["Korkmuş"] = emotion_confidence
+            else:
+                emotion_percentages["Nötr"] = emotion_confidence
 
             # Sonuçları ekrana yazdır
-            messagebox.showinfo("Tanımlanan Konuşmacı", f"Tanımlanan Konuşmacı: {speaker_name}")
+            emotion_string = ", ".join([f"{e} %{emotion_percentages[e]:.2f}" for e in emotions if emotion_percentages[e] > 0])
+
+            messagebox.showinfo("Tanımlanan Konuşmacı ve Duygu", 
+                                f"Tanımlanan Konuşmacı: {speaker_name}\n"
+                                f"Doğruluk Oranı: {confidence:.2f}%\n"
+                                f"Duygular: {emotion_string}")
         else:
             print(f"Ses Eşiği Aşılmadı: {audio_magnitude}")
 
     # Anlık kişi tanıma işlemi
     with sd.InputStream(callback=recognize, channels=1, samplerate=SAMPLE_RATE, blocksize=CHUNK):
         messagebox.showinfo("Bilgi", "Anlık konuşmacı tanıma başlatıldı. Pencereyi kapatmak için 'X'e basabilirsiniz.")
+
+
+
 
 
 # ---------------- Ana Menü ----------------
