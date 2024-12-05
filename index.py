@@ -172,8 +172,6 @@ def user_story_2():
     global word_count
     word_count = 0  # Kelime sayısını her yeni pencere açıldığında sıfırlıyoruz
 
-    predefined_words = {"merhaba", "evet", "hayır", "tamam", "lütfen", "teşekkürler"}  # Örnek doğru kelimeler
-
     def recognize_continuous():
         """Mikrofondan sürekli olarak ses tanıyıp anlık olarak ekranda gösterir."""
         recognizer = sr.Recognizer()
@@ -192,12 +190,6 @@ def user_story_2():
 
         # Text widget'ını sadece okunabilir yapmak
         text_display.config(state=tk.DISABLED)
-
-        acc_label = tk.Label(result_window, text="Accuracy: --", font=("Arial", 12))
-        acc_label.pack(pady=10)
-
-        f1_label = tk.Label(result_window, text="F1-Score: --", font=("Arial", 12))
-        f1_label.pack(pady=10)
 
         word_count_label = tk.Label(result_window, text="Toplam Kelime Sayısı: 0", font=("Arial", 12))
         word_count_label.pack(pady=10)
@@ -220,22 +212,11 @@ def user_story_2():
 
                     # Tanınan kelimeler
                     recognized_words = set(recognized_text.lower().split())
-                    true_positives = recognized_words & predefined_words  # Doğru kelimelerle kesişim
 
                     # Kelime sayısını artır
                     word_count += len(recognized_words)
 
-                    # Precision ve Recall hesaplama
-                    precision = len(true_positives) / len(recognized_words) if recognized_words else 0
-                    recall = len(true_positives) / len(predefined_words) if predefined_words else 0
-
-                    # F1-Score ve Accuracy
-                    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-                    accuracy = len(true_positives) / len(predefined_words) if predefined_words else 0
-
                     # Sonuçları güncelle
-                    acc_label.config(text=f"Accuracy: {accuracy:.2f}")
-                    f1_label.config(text=f"F1-Score: {f1:.2f}")
                     word_count_label.config(text=f"Toplam Kelime Sayısı: {word_count}")
                 except sr.UnknownValueError:
                     pass  # Anlaşılmayan sesleri yoksay
@@ -245,7 +226,6 @@ def user_story_2():
 
     # Yeni bir thread (iş parçacığı) oluşturuyoruz, böylece ses tanıma işlemi ana thread'i engellemiyor
     threading.Thread(target=recognize_continuous, daemon=True).start()
-
 
 
 
@@ -317,6 +297,17 @@ def user_story_3():
             print(f"Tanımlanan Konuşmacı: {speaker_name}, Doğruluk Oranı: {confidence:.2f}%")
             print(f"Duygu: {emotion}, Duygu Doğruluğu: {emotion_confidence:.2f}%")
 
+            # F1 Skoru ve Doğruluk Hesaplama (Modeli test ettikten sonra)
+            X_test = mfccs_scaled  # Bu örnekte, sadece bir test örneği var. Gerçek uygulamada, test seti kullanılacak
+            y_test = label_encoder.transform([speaker_name])  # Gerçek etiket
+            y_pred = speaker_model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            f1 = f1_score(y_test, y_pred, average="weighted")
+            
+            # F1 ve Doğruluk değerlerini ekranda göster
+            print(f"Model Doğruluk: {accuracy:.2f}")
+            print(f"F1 Skoru: {f1:.2f}")
+            
             # Duygu yüzdesi hesaplama
             emotions = ["Mutlu", "Üzgün", "Sinirli", "Korkmuş", "Nötr"]
             emotion_percentages = {
@@ -345,16 +336,15 @@ def user_story_3():
             messagebox.showinfo("Tanımlanan Konuşmacı ve Duygu", 
                                 f"Tanımlanan Konuşmacı: {speaker_name}\n"
                                 f"Doğruluk Oranı: {confidence:.2f}%\n"
-                                f"Duygular: {emotion_string}")
+                                f"Duygular: {emotion_string}\n"
+                                f"Model Doğruluk: {accuracy:.2f}\n"
+                                f"F1 Skoru: {f1:.2f}")
         else:
             print(f"Ses Eşiği Aşılmadı: {audio_magnitude}")
 
     # Anlık kişi tanıma işlemi
     with sd.InputStream(callback=recognize, channels=1, samplerate=SAMPLE_RATE, blocksize=CHUNK):
         messagebox.showinfo("Bilgi", "Anlık konuşmacı tanıma başlatıldı. Pencereyi kapatmak için 'X'e basabilirsiniz.")
-
-
-
 
 
 # ---------------- Ana Menü ----------------
@@ -370,7 +360,6 @@ def show_main_menu():
     tk.Button(root, text="User Story 2: Ses Tanıma", command=user_story_2, font=("Arial", 16)).pack(pady=10)
     tk.Button(root, text="User Story 3: Anlık Kişi Tanıma", command=user_story_3, font=("Arial", 16)).pack(pady=10)
     tk.Button(root, text="Çıkış", command=root.quit, font=("Arial", 16)).pack(pady=20)
-
 
 # ---------------- Program Başlatma ----------------
 root = tk.Tk()
