@@ -1,5 +1,6 @@
+import json
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import ttk,messagebox, simpledialog
 import sounddevice as sd
 import numpy as np
 import librosa
@@ -167,10 +168,35 @@ def user_story_1():
 
 
 # ---------------- User Story 2: Ses Tanıma ----------------
+# Anahtar kelimelere dayalı konu belirleme fonksiyonu
+def get_topics_from_keywords(sentence):
+    # JSON dosyasını oku
+    with open("topics.json", "r", encoding="utf-8") as file:
+        topics = json.load(file)
+
+    # Cümleyi küçük harfe çevir
+    sentence = sentence.lower()
+    matching_topics = []
+
+    # Konuları ve anahtar kelimeleri kontrol et
+    for topic, keywords in topics.items():
+        for keyword in keywords:
+            if keyword in sentence:
+                if topic not in matching_topics:
+                    matching_topics.append(topic)
+    
+    # Eğer eşleşen bir konu yoksa
+    if not matching_topics:
+        return ["Belirlenmemiş"]
+    
+    # Birden fazla konu varsa virgülle ayır
+    return ", ".join(matching_topics)
+
+
 def user_story_2():
     """Ses tanıma işlemi başlatır ve tanınan metni ekrana yazdırır."""
     global word_count
-    word_count = 0  # Kelime sayısını her yeni pencere açıldığında sıfırlıyoruz
+    word_count = 0
 
     def recognize_continuous():
         """Mikrofondan sürekli olarak ses tanıyıp anlık olarak ekranda gösterir."""
@@ -180,19 +206,39 @@ def user_story_2():
         # Yeni pencere açılır
         result_window = tk.Toplevel(root)
         result_window.title("Anlık Ses Tanıma")
-        result_window.geometry("500x500")
+        result_window.geometry("600x500")
 
+        # Tanınan kelimeler başlığı
         label = tk.Label(result_window, text="Tanınan Kelimeler", font=("Arial", 16))
         label.pack(pady=10)
 
-        text_display = tk.Text(result_window, height=10, width=40, font=("Arial", 14))
-        text_display.pack(pady=20)
-
-        # Text widget'ını sadece okunabilir yapmak
-        text_display.config(state=tk.DISABLED)
-
+        # Kelime sayısını gösteren etiket
         word_count_label = tk.Label(result_window, text="Toplam Kelime Sayısı: 0", font=("Arial", 12))
         word_count_label.pack(pady=10)
+
+        # Tablo çerçevesi ve kaydırma çubuğu
+        table_frame = tk.Frame(result_window)
+        table_frame.pack(fill=tk.BOTH, expand=True)
+
+        tree_scroll = ttk.Scrollbar(table_frame)
+        tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+        tree = ttk.Treeview(
+            table_frame,
+            columns=("Cümle", "Konu"),
+            show="headings",
+            yscrollcommand=tree_scroll.set,
+        )
+        tree.pack(fill=tk.BOTH, expand=True)
+        tree_scroll.config(command=tree.yview)
+
+        # Sütun başlıkları
+        tree.heading("Cümle", text="Algılanan Cümle", anchor="center")
+        tree.heading("Konu", text="Konu", anchor="center")
+
+        # Sütun genişlikleri
+        tree.column("Cümle", anchor="center", width=400)
+        tree.column("Konu", anchor="center", width=150)
 
         # Mikrofon üzerinden ses tanıma
         with sr.Microphone() as source:
@@ -204,20 +250,15 @@ def user_story_2():
                     audio = recognizer.listen(source)
                     recognized_text = recognizer.recognize_google(audio, language="tr-TR")
 
-                    # Tanınan kelimeleri ekrana yaz
-                    text_display.config(state=tk.NORMAL)  # Yazma izni
-                    text_display.insert(tk.END, recognized_text + '\n')  # Tanınan metni ekler
-                    text_display.yview(tk.END)  # Ekranın en altına kaydır
-                    text_display.config(state=tk.DISABLED)  # Sadece okunabilir yap
-
-                    # Tanınan kelimeler
-                    recognized_words = set(recognized_text.lower().split())
-
                     # Kelime sayısını artır
-                    word_count += len(recognized_words)
-
-                    # Sonuçları güncelle
+                    word_count += len(recognized_text.split())
                     word_count_label.config(text=f"Toplam Kelime Sayısı: {word_count}")
+
+                    # Konu belirleme
+                    topic = get_topics_from_keywords(recognized_text)
+
+                    # Tabloya ekleme
+                    tree.insert("", "end", values=(recognized_text, topic))
                 except sr.UnknownValueError:
                     pass  # Anlaşılmayan sesleri yoksay
                 except sr.RequestError:
@@ -337,8 +378,8 @@ def user_story_3():
                                 f"Tanımlanan Konuşmacı: {speaker_name}\n"
                                 f"Doğruluk Oranı: {confidence:.2f}%\n"
                                 f"Duygular: {emotion_string}\n"
-                                f"Model Doğruluk: {accuracy:.2f}\n"
-                                f"F1 Skoru: {f1:.2f}")
+                                f"Accuracy : {accuracy:.2f}\n"
+                                f"F1 Score: {f1:.2f}")
         else:
             print(f"Ses Eşiği Aşılmadı: {audio_magnitude}")
 
