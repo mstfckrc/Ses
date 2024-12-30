@@ -92,7 +92,8 @@ def user_story_3():
 
                     # Renk atama
                     if speaker not in speaker_colors:
-                        speaker_colors[speaker] = np.random.default_rng().random(3)
+                        # noinspection PyArgumentEqualDefault
+                        speaker_colors[speaker] = np.random.default_rng().random(3)   
 
                     # Zaman aralığı ekleme
                     speaker_intervals[speaker].append({
