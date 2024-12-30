@@ -1,5 +1,5 @@
 from tkinter import Tk, Toplevel, Label, Button, messagebox
-import matplotlib.pyplot as plt3
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from collections import defaultdict, Counter
 import librosa
@@ -114,7 +114,7 @@ def user_story_3():
         analysis_window.geometry("1200x900")
         analysis_window.configure(bg="white")  # Analiz penceresinin arka planı
 
-        fig, (ax1, ax2) = plt3.subplots(2, 1, figsize=(8, 6))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
 
         # Sesin genliğini (seviyesini) hesapla ve zaman eksenine yerleştir
         time_axis = np.linspace(0, len(audio_recording) / SAMPLE_RATE, len(audio_recording))
@@ -149,7 +149,7 @@ def user_story_3():
         ax2.pie(durations, labels=speakers, autopct="%1.1f%%", colors=colors, startangle=90)
         ax2.set_title("Konuşmacı Süreleri Dağılımı")
 
-        plt3.tight_layout()
+        plt.tight_layout()
 
         # Canvas ekleme
         canvas = FigureCanvasTkAgg(fig, master=analysis_window)
@@ -184,7 +184,7 @@ def user_story_3():
         f1_label.pack(pady=5)
 
         # Grafiği kapatmak için plt.close()
-        plt3.close(fig)  # Bu satır, matplotlib grafiğini kapatır ve belleği temizler.
+        plt.close(fig)  # Bu satır, matplotlib grafiğini kapatır ve belleği temizler.
 
     # Arayüz butonları
     start_button = Button(root, text="Kaydı Başlat", command=start_recording, font=("Arial", 12), bg="white")

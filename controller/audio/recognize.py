@@ -28,6 +28,7 @@ def wrap_text(text, max_length):
 
 def recognize_continuous():
     """Mikrofondan sürekli olarak ses tanıyıp anlık olarak ekranda gösterir."""
+    header = "Cümle"
     recognizer = sr.Recognizer()
     global word_count
     word_count = 0
@@ -56,7 +57,7 @@ def recognize_continuous():
 
     tree = ttk.Treeview(
         table_frame,
-        columns=("Cümle", "Konu"),
+        columns=(header, "Konu"),
         show="headings",
         yscrollcommand=tree_scroll.set,
         height=20
@@ -65,11 +66,11 @@ def recognize_continuous():
     tree_scroll.config(command=tree.yview)
 
     # Sütun başlıkları
-    tree.heading("Cümle", text="Algılanan Cümle", anchor="center")
+    tree.heading(header, text="Algılanan Cümle", anchor="center")
     tree.heading("Konu", text="Konu", anchor="center")
 
     # Sütun genişlikleri
-    tree.column("Cümle", anchor="center", width=400)
+    tree.column(header, anchor="center", width=400)
     tree.column("Konu", anchor="center", width=150)
 
     # Mikrofon üzerinden ses tanıma

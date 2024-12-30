@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt1
+from matplotlib import pyplot as plt
 import sounddevice as sd
 
 from config import CHUNK, SAMPLE_RATE
@@ -10,6 +10,6 @@ def user_story_1():
     """Histogram oluşturulmasını sağlar."""
     setStopFlag(False)
     with sd.InputStream(callback=real_time_audio_histogram, channels=1, samplerate=SAMPLE_RATE, blocksize=CHUNK):
-        fig = plt1.figure()
+        fig = plt.figure()
         fig.canvas.mpl_connect('close_event', stop_program)
         update_histogram()
