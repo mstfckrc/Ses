@@ -42,7 +42,7 @@ def train_speaker_model():
     x_train, x_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
     # Model eğitimi
-    speaker_model = SVC(kernel="linear", probability=True)
+    speaker_model = SVC(kernel="linear", probability=True , C=10, gamma='scale')
     speaker_model.fit(x_train, y_train)
     setSpeakerModel(speaker_model)
 

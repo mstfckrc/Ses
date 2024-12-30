@@ -34,12 +34,12 @@ def train_emotion_model():
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
-    model = SVC(kernel="linear", probability=True)
-    model.fit(X_train, y_train)
+    model = SVC(kernel="linear", probability=True, C=10, gamma='scale')
+    model.fit(x_train, y_train)
 
-    y_pred = model.predict(X_test)
+    y_pred = model.predict(x_test)
     accuracy = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="weighted")
     
