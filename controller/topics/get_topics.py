@@ -1,6 +1,5 @@
 import json
 
-
 def get_topics_from_keywords(sentence):
     # JSON dosyasını oku
     with open("controller/topics/topics.json", "r", encoding="utf-8") as file:
@@ -13,8 +12,7 @@ def get_topics_from_keywords(sentence):
     # Konuları ve anahtar kelimeleri kontrol et
     for topic, keywords in topics.items():
         for keyword in keywords:
-            if keyword in sentence:
-                if topic not in matching_topics:
+            if keyword in sentence and topic not in matching_topics:
                     matching_topics.append(topic)
     
     # Eğer eşleşen bir konu yoksa

@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, f1_score
 import librosa
 import numpy as np
-from globals import setEmotionAccuracy, setEmotionF1Score
+from globals import set_emotion_accuracy as setEmotionAccuracy, set_emotion_f1_score as setEmotionF1Score
 from model.emotion.emotion_speakers_data import load_emotions_data
 
 def train_emotion_model():

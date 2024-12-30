@@ -16,67 +16,67 @@ audio_f1_score = None
 emotion_accuracy = None
 emotion_f1_score = None
 
-def getRoot():
+def get_root():
     return root
 
-def setRoot(newRoot):
+def set_root(newRoot):
     global root
     root = newRoot
 
 
-def getSpeakerModel():
+def get_speaker_model():
     return speaker_model
 
-def getLabelEncoder():
+def get_label_encoder():
     return label_encoder
 
-def getScaler():
+def get_scaler():
     return scaler
 
-def setSpeakerModel(newSpeakerModel):
+def set_speaker_model(newSpeakerModel):
     global speaker_model
     speaker_model = newSpeakerModel
 
 
-def setLabelEncoder(newLabelEncoder):
+def set_label_encoder(newLabelEncoder):
     global label_encoder
     label_encoder = newLabelEncoder
 
 
-def setScaler(newScaler):
+def set_scaler(newScaler):
     global scaler
     scaler = newScaler
 
-def getStopFlag():
+def get_stop_flag():
     return stop_flag
 
-def setStopFlag(newStopFlag):
+def set_stop_flag(newStopFlag):
     global stop_flag
     stop_flag = newStopFlag
     
-def getAudioAccuracy():
+def get_audio_accuracy():
     return audio_accuracy
 
-def setAudioAccuracy(newAudioAccuracy):
+def set_audio_accuracy(newAudioAccuracy):
     global audio_accuracy
     audio_accuracy = newAudioAccuracy
 
-def getAudioF1Score():
+def get_audio_f1_score():
     return audio_f1_score
 
-def setAudioF1Score(newAudioF1Score):
+def set_audio_f1_score(newAudioF1Score):
     global audio_f1_score
     audio_f1_score = newAudioF1Score
 
-def getEmotionAccuracy():
+def get_emotion_accuracy():
     return emotion_accuracy
 
-def setEmotionAccuracy(newEmotionAccuracy):
+def set_emotion_accuracy(newEmotionAccuracy):
     global emotion_accuracy
     emotion_accuracy = newEmotionAccuracy
-def getEmotionF1Score():
+def get_emotion_f1_score():
     return emotion_f1_score
 
-def setEmotionF1Score(newEmotionF1Score):
+def set_emotion_f1_score(newEmotionF1Score):
     global emotion_f1_score
     emotion_f1_score = newEmotionF1Score

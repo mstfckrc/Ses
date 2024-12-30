@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 def load_emotions_data(data_dir="data/emotion_records"):
     """Klasörlerden duygu verilerini yükler."""

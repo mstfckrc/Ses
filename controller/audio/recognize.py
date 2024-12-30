@@ -3,7 +3,7 @@ import speech_recognition as sr
 import tkinter as tk
 from tkinter import ttk
 from controller.topics.get_topics import get_topics_from_keywords
-from globals import getRoot, word_count
+from globals import get_root as getRoot, word_count
 
 def wrap_text(text, max_length):
     """Metni belirtilen uzunlukta alt satıra böler."""

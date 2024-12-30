@@ -5,12 +5,12 @@ from collections import defaultdict, Counter
 import librosa
 import numpy as np
 from controller.emotion.predict import predict_emotion
-from globals import getAudioAccuracy, getAudioF1Score, getLabelEncoder, getScaler, getSpeakerModel, getEmotionAccuracy, getEmotionF1Score
 from model.audio.train_speaker import train_speaker_model
 import sounddevice as sd
 import os
 from config import SAMPLE_RATE, EMOTION_DATA_DIR
 from model.emotion.emotion_train_speaker import train_emotion_model
+from globals import get_speaker_model as getSpeakerModel, get_label_encoder as getLabelEncoder, get_scaler as getScaler , get_audio_accuracy as getAudioAccuracy, get_audio_f1_score as getAudioF1Score , get_emotion_accuracy as getEmotionAccuracy, get_emotion_f1_score as getEmotionF1Score
 
 # Yeni eklenenler
 audio_recording = []  # Kaydedilen sesi tutar

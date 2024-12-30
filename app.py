@@ -1,7 +1,7 @@
 import tkinter as tk
 from controller.audio.record_user import record_user_voice
 from controller.emotion.record_user_emotion import record_user_emotion
-from globals import setRoot
+from globals import set_root as setRoot
 from ui.story1 import user_story_1
 from ui.story2 import user_story_2
 from ui.story3 import user_story_3

@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score , accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from config import DATA_DIR, SAMPLE_RATE
-from globals import getLabelEncoder, getScaler, getSpeakerModel, setAudioAccuracy, setAudioF1Score, setLabelEncoder, setSpeakerModel
+from globals import get_speaker_model as getSpeakerModel, get_label_encoder as getLabelEncoder, get_scaler as getScaler , set_audio_accuracy as setAudioAccuracy, set_audio_f1_score as setAudioF1Score , set_label_encoder as setLabelEncoder , set_speaker_model as setSpeakerModel
 from model.audio.speakers_data import load_speakers_data
 
 def train_speaker_model():

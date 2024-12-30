@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from config import SAMPLE_RATE
-from globals import getStopFlag, setStopFlag, audio_data
+from globals import get_stop_flag as getStopFlag , set_stop_flag as setStopFlag , audio_data
 
 def update_histogram():
     """Zaman ve frekans domaini histogramlarını çizer."""
