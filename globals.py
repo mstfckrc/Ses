@@ -19,9 +19,9 @@ emotion_f1_score = None
 def get_root():
     return root
 
-def set_root(newRoot):
+def set_root(new_root):
     global root
-    root = newRoot
+    root = new_root
 
 
 def get_speaker_model():
@@ -33,50 +33,50 @@ def get_label_encoder():
 def get_scaler():
     return scaler
 
-def set_speaker_model(newSpeakerModel):
+def set_speaker_model(new_speaker_model):
     global speaker_model
-    speaker_model = newSpeakerModel
+    speaker_model = new_speaker_model
 
 
-def set_label_encoder(newLabelEncoder):
+def set_label_encoder(new_label_encoder):
     global label_encoder
-    label_encoder = newLabelEncoder
+    label_encoder = new_label_encoder
 
 
-def set_scaler(newScaler):
+def set_scaler(new_scaler):
     global scaler
-    scaler = newScaler
+    scaler = new_scaler
 
 def get_stop_flag():
     return stop_flag
 
-def set_stop_flag(newStopFlag):
+def set_stop_flag(new_stop_flag):
     global stop_flag
-    stop_flag = newStopFlag
+    stop_flag = new_stop_flag
     
 def get_audio_accuracy():
     return audio_accuracy
 
-def set_audio_accuracy(newAudioAccuracy):
+def set_audio_accuracy(new_audio_accuracy):
     global audio_accuracy
-    audio_accuracy = newAudioAccuracy
+    audio_accuracy = new_audio_accuracy
 
 def get_audio_f1_score():
     return audio_f1_score
 
-def set_audio_f1_score(newAudioF1Score):
+def set_audio_f1_score(new_audio_f1_score):
     global audio_f1_score
-    audio_f1_score = newAudioF1Score
+    audio_f1_score = new_audio_f1_score
 
 def get_emotion_accuracy():
     return emotion_accuracy
 
-def set_emotion_accuracy(newEmotionAccuracy):
+def set_emotion_accuracy(new_emotion_accuracy):
     global emotion_accuracy
-    emotion_accuracy = newEmotionAccuracy
+    emotion_accuracy = new_emotion_accuracy
 def get_emotion_f1_score():
     return emotion_f1_score
 
-def set_emotion_f1_score(newEmotionF1Score):
+def set_emotion_f1_score(new_emotion_f1_score):
     global emotion_f1_score
-    emotion_f1_score = newEmotionF1Score
+    emotion_f1_score = new_emotion_f1_score

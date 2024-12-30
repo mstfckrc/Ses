@@ -11,8 +11,6 @@ from model.audio.speakers_data import load_speakers_data
 
 def train_speaker_model():
     """Konuşmacı tanıma modeli eğitir."""
-    speaker_model = getSpeakerModel() 
-    label_encoder = getLabelEncoder()
     scaler = getScaler()
 
     speakers_data = load_speakers_data(DATA_DIR)
@@ -41,15 +39,15 @@ def train_speaker_model():
     # Veriyi normalize et (Scaler eğitimde fit edilir)
     X = scaler.fit_transform(X)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
     # Model eğitimi
     speaker_model = SVC(kernel="linear", probability=True)
-    speaker_model.fit(X_train, y_train)
+    speaker_model.fit(x_train, y_train)
     setSpeakerModel(speaker_model)
 
     # Model doğruluğunu hesapla
-    y_pred = speaker_model.predict(X_test)
+    y_pred = speaker_model.predict(x_test)
     accuracy = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="weighted")
     
