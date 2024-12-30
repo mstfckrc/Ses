@@ -17,7 +17,7 @@ speaker_intervals = defaultdict(list)  # Konuşmacı zaman aralıkları
 speaker_colors = {}  # Konuşmacı renkleri
 SPEECH_THRESHOLD = 0.1  # Ses seviyesi eşiği
 
-def user_story_3(): # NOSONAR
+def user_story_3():
     """Ses kaydı yapar, konuşmacıları ve duyguları analiz eder, zaman grafiğini gösterir."""
 
     # Model eğitimi
@@ -92,8 +92,7 @@ def user_story_3(): # NOSONAR
 
                     # Renk atama
                     if speaker not in speaker_colors:
-                        # noinspection PyArgumentEqualDefault
-                        speaker_colors[speaker] = np.random.default_rng().random(3) #NOSONAR
+                        speaker_colors[speaker] = np.random.default_rng().random(3) # NOSONAR
 
                     # Zaman aralığı ekleme
                     speaker_intervals[speaker].append({
