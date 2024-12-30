@@ -1,0 +1,56 @@
+{
+    "Teknoloji": [
+        "bilgisayar", "yazılım", "programlama", "internet", "teknoloji", "kodlama", 
+        "uygulama", "robotik", "yapay zeka", "ai", "otomasyon", "donanım", 
+        "mobil", "veri bilimi", "bulut bilişim", "blockchain", "siber güvenlik", 
+        "nesnelerin interneti", "iot", "kripto para", "metaverse", "dijitalleşme", 
+        "vr", "ar", "çevrimiçi", "gadget", "çip", "algoritma"
+    ],
+    "Ekonomi": [
+        "ekonomi", "pazar", "büyüme", "yatırım", "dolar", "borsa", "faiz", 
+        "enflasyon", "para", "hisse senedi", "maliye", "finans", "tüketim", 
+        "kredi", "vergi", "borç", "sermaye", "tasarruf", "işsizlik", 
+        "küresel ekonomi", "dış ticaret", "ithalat", "ihracat", "ticaret savaşı", 
+        "girişimcilik", "bankacılık", "piyasa", "gdp", "brüt kar"
+    ],
+    "Sağlık": [
+        "sağlık", "doktor", "hastalık", "tedavi", "ilaç", "koronavirüs", 
+        "aşı", "hastane", "ameliyat", "beslenme", "diyet", "spor", "psikoloji", 
+        "fizyoterapi", "kanser", "tansiyon", "şeker hastalığı", "bağışıklık", 
+        "pandemi", "grip", "mental sağlık", "terapi", "hijyen", "stres", 
+        "bağımlılık", "migren", "uzman doktor", "check-up", "klinik", 
+        "veteriner", "doğum", "bebek sağlığı"
+    ],
+    "Eğitim": [
+        "okul", "öğrenci", "eğitim", "ders", "üniversite", "öğretmen", 
+        "online eğitim", "sınav", "test", "araştırma", "ödev", "akademik", 
+        "yüksek lisans", "tez", "bilim", "matematik", "fizik", "kimya", 
+        "biyoloji", "tarih", "edebiyat", "sanat", "psikoloji", "etüt", 
+        "kütüphane", "kurs", "kariyer", "mentorluk", "burs", "mezuniyet", 
+        "okul öncesi", "lise", "dil eğitimi", "yabancı dil", "sertifika programı"
+    ],
+    "Spor": [
+        "spor", "futbol", "basketbol", "tenis", "voleybol", "koşu", "atletizm", 
+        "antrenman", "şampiyona", "müsabaka", "oyun", "gol", "kulüp", 
+        "transfer", "koç", "fitness", "yüzme", "bisiklet", "karate", "taekwondo", 
+        "boks", "snowboard", "kayak", "halter", "dünya kupası", "olimpiyat", 
+        "lig", "puan", "rekor", "spor salonu", "sağlıklı yaşam"
+    ],
+    "Sanat": [
+        "sanat", "resim", "müzik", "heykel", "sergi", "galeri", "sanatçı", 
+        "tiyatro", "film", "edebiyat", "şiir", "dans", "opera", "bale", 
+        "orkestra", "çizim", "karikatür", "grafik tasarım", "fotoğrafçılık", 
+        "sinematografi", "senaryo", "yazar", "oyuncu", "hikaye", "roman", 
+        "sanat tarihi", "kültür", "yaratıcılık", "dijital sanat", "portre", 
+        "modern sanat", "klasik müzik"
+    ],
+    "Çevre": [
+        "çevre", "doğa", "iklim değişikliği", "küresel ısınma", "geri dönüşüm", 
+        "karbon salınımı", "biyolojik çeşitlilik", "orman", "yeşil enerji", 
+        "güneş enerjisi", "rüzgar enerjisi", "su kirliliği", "hava kirliliği", 
+        "atık yönetimi", "sürdürülebilirlik", "çevre kirliliği", "eko-sistem", 
+        "yenilenebilir enerji", "plastik kirliliği", "çevre dostu", "biyoyakıt", 
+        "doğal kaynaklar", "doğa koruma", "hayvan hakları", "orman yangınları", 
+        "küresel çevre"
+    ]
+}
