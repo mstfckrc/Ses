@@ -36,7 +36,7 @@ def train_emotion_model():
 
     x_train, x_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
 
-    model = SVC(kernel="linear", probability=True, C=10, gamma='scale')
+    model = SVC(kernel="linear", probability=True, C=10, gamma='scale' , random_state=42)
     model.fit(x_train, y_train)
 
     y_pred = model.predict(x_test)
